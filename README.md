@@ -9,4 +9,8 @@
 
 But this will not work with our new file structure. We run compiler with including files:
     
-    cc src/my_app.c src/lib/multi_file.c -o tell_more -I include/
+    cc src/my_app.c src/lib/multi_file.c -o tell_me_time -I include/
+
+Buy the way we call our outputs from ubuntu console like : (supposed we are on top directory)
+
+    ./tell_me_time
