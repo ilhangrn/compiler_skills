@@ -250,4 +250,6 @@ It is mostly compiled code. Near to machine code. It has no addresses for functi
 
 > -nostdlib will not link standart system startup files or libraries. This is equivalent to -nodefaultlibs.
 
+    *Before passing to another section lets we need to take care of docs. Lets add mdbook for this project.
+
 ### Uncommon flags we may need
