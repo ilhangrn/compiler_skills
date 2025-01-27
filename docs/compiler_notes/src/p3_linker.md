@@ -90,3 +90,104 @@
     *Before passing to another section lets we need to take care of docs. Lets add mdbook for this project.
 
 ### Uncommon flags we may need
+
+> -u flag can be used to mark a function as undefined. This is used to unload a function definition so another library can use. e.g
+
+    -u symbol_to_undefine
+
+> After a regular embedded script becomes like this:
+
+    -Larchitecture/arm/linker -Tgcc_arm_common.ld -specs=nosys.specs
+
+If we dont need to use different standart libs we do not use -nodefault or -nolibc.
+
+> Note that not all linker flags recognised by compiler. We need to pass them with an extra -Xlinker or -Wl flag. The flag following -Xlinker will be passed to linker.
+
+> to pass command to linker to create a map file named test.map, command becomes:
+
+    cc my_app.o multi_file.o -Xlinker -Map -Xlinker test.map
+
+    or we can use flag=argument style
+    cc my_app.o multi_file.o -Xlinker -Map=test.map
+
+> if we use -Wl we use commo to seperate them
+
+    cc my_app.o multi_file.o -Wl,-Map,test.map
+
+In general we prefer -Wl version.
+
+### Linking for a static library
+> we do it some reasons:
+- When we need to compile different parts with different flags, include paths and preprocessors.
+- To leverage information hiding, encapsulation to decrease coupling.
+- To keep source code hidden while releasing pre compiled libraries to customers
+- To reduce compalation time for complex builds
+
+
+    For embedded system engineers static libraries are almost always the choice.
+
+To create our static library we don't use linker or compiler, instead we use archiver(ar). e.g
+
+    ar rcs my_app.a my_app.o multi_file.o
+    -ar
+        archiver
+    r: insert symbols, replace already existing
+    c: create a new arc
+    s: write an index
+
+> lets say we want to create static library for parts. We need to archive them individualy like here:
+
+    cc -c src/my_app.c src/lib/multi_file.c -I include
+    ar rcs libmultifile.a multi_file.o
+
+> Now it is time to link them for application. We need to compile other part too. We already did. We have two .a files.
+
+> I failed at this point, will check it later.
+
+### Linking for shared library
+> Shared libraries are created using the compiler/linker. We need to use special compilation. We use -fPIC flag to create position-indepent code. It means it can be executed in any memory address without modification. We go to library directory and call
+
+    cc -fPIC -c multi_file.c -o multi_pic.o -I ../../include/
+
+    then we call:
+
+    cc -shared multi_pic.o -o multi_dyn.dylib
+    cc -shared multi_pic.o -o multi_dyn.so
+    cc -shared multi_pic.o -o multi_dyn.dll
+
+> Now we have shared library which is with 
+    .dylib for OS X, 
+    .so for linux 
+    .dll for windows
+
+> Now we know all, we could run directly from compiler with a single command below. Gives us shared library from c files.
+
+    cc -shared multi_file.c -o libmulti_func.so -I ../../include
+
+    It could be .dll or dylib. Just examples.
+
+> Sumamry:
+
+    If you are going to compile source files into object files that will be used in shared library, use:
+    -fPIC -c
+    -> output is .o object files
+
+    If you are compiling sources or object files into a shared library using the compiler front-end use: 
+    -shared.
+    -> output is the shared library with .so, .dll, .dylib
+    
+    We usually create share libraries through library front-end.
+
+> Remember we generated libmultifunc.so, i moved it to top folder to use as library and generate output. we call next command(-L. says our library is here) and lmulti_func says there is a shared library named "libmulti_func".[extention] 
+
+    cc my_app.o -L. -lmulti_func -o multi_linked_lib
+
+> Now we have application named multi_linked_lib. We call
+
+    ./multi_linked_lib
+    -> and we fail. Because program loader looks another path for shared libraries. So we tell it our shared is here.
+
+    LD_LIBRARY_PATH=. ./multi_linked_lib
+    -> it works. It was a long journey to run a c code. Life was never easy, we forget!
+
+

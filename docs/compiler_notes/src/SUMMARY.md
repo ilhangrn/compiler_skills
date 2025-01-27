@@ -1,3 +1,4 @@
-- [Intro](./p1-intro.md)
-- [Compiler](./p2-compiler.md)
-- [Linker](./p3-linker.md)
+- [Intro](./p1_intro.md)
+- [Compiler](./p2_compiler.md)
+- [Linker](./p3_linker.md)
+- [Structure](./p4_structure.md)
